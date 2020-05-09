@@ -1,7 +1,6 @@
 <template>
   <div class="submit-form">
     <div v-if="!submitted">
-      <a href="/films">Retour</a>
       <h4>Ajouter un film</h4>
       <div class="form-group">
         <label for="title">Titre du film</label>
@@ -9,22 +8,27 @@
       </div>
       <div class="form-group">
         <label for="genre">Genre du film</label>
-        <input class="form-control" id="id_categorie" required v-model="film.id_categorie" name="id_categorie"/>
+        <!--<input class="form-control" id="id_categorie" required v-model="film.id_categorie" name="id_categorie"/>-->
+        <select v-model="film.id_categorie" class="form-control" :required="true">
+          <option v-for="(categorie, index) in categories" :key="index" v-bind:value="categorie.id">
+            {{categorie.name}}
+          </option>
+        </select>
       </div>
-
       <button @click="saveFilm" class="btn btn-success">Ajouter</button>
+      <a href="/films" style="cursor:pointer; margin-left: 10px;" class="btn btn-danger">Annuler</a>
     </div>
-
     <div v-else>
       <br>
-      <span style="color: green;">{{ message }}</span><br>
-      <a href="/films">Retour</a>
+      <span style="color:green;">{{ message }}</span><br>
+      <a href="/films" class="btn btn-info">Retour</a>
     </div>
   </div>
 </template>
 
 <script>
 import FilmDataService from "../services/FilmDataService";
+import CategorieDataService from "../services/CategorieDataService";
 
 export default {
   name: "add-film",
@@ -35,7 +39,9 @@ export default {
         title: "",
         id_categorie: "",
         message:"",
+        
       },
+      categories: [],
       submitted: false
     };
   },
@@ -57,11 +63,25 @@ export default {
           console.log(e);
         });
     },
+
+    retrieveCategories() {
+      CategorieDataService.getAll()
+        .then(response => {
+          this.categories = response.data.categories;
+          console.log(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
     
     newFilm() {
       this.submitted = false;
       this.film = {};
     }
+  },
+  mounted() {
+      this.retrieveCategories();
   }
 };
 </script>
@@ -69,6 +89,5 @@ export default {
 <style>
 .submit-form {
   max-width: 300px;
-  margin: auto;
 }
 </style>
